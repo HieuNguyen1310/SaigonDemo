@@ -35,10 +35,13 @@ public class TimeCounterTrigger : MonoBehaviour
         }
     }
 
+    
+
  
 
     void Update()
-    {   Debug.Log(isTiming);
+    {   
+        //Debug.Log(isTiming);
         if (isTiming)
         {
             float elapsedTime = Time.time - startTime;
