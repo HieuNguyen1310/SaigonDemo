@@ -10,13 +10,14 @@ public class Grappling : MonoBehaviour
     public Transform cam;
     public Transform gunTip;
     public LayerMask whatIsGrappleable;
-
     public LineRenderer lr;
+
+    public PlayerCam camEffect;
 
     [Header("Grappling")] 
     public float maxGrappleDistance;
     public float grappleDelayTime;
-    public float overShootYAxis;
+    public float overshootYAxis;
 
     private Vector3 _grapplePoint;
 
@@ -27,7 +28,7 @@ public class Grappling : MonoBehaviour
     [Header("Input")] 
     public KeyCode grappleKey = KeyCode.Mouse1;
 
-    private bool _isGrappling;
+    private bool _grappling;
 
     private void Start()
     {
@@ -44,20 +45,18 @@ public class Grappling : MonoBehaviour
 
     private void LateUpdate()
     {
-        if(_isGrappling)
+        if (_grappling)
             lr.SetPosition(0, gunTip.position);
     }
 
-    // ReSharper disable Unity.PerformanceAnalysis
     private void StartGrapple()
     {
         if (_grapplingCdTimer > 0) return;
 
-        _isGrappling = true;
-
-        // _pm.isFreeze = true;
+        _grappling = true;
 
         RaycastHit hit;
+
         if (Physics.Raycast(cam.position, cam.forward, out hit, maxGrappleDistance, whatIsGrappleable))
         {
             _grapplePoint = hit.point;
@@ -77,40 +76,41 @@ public class Grappling : MonoBehaviour
 
     private void ExecuteGrapple()
     {
-        // _pm.isFreeze = false;
-
         Vector3 lowestPoint = new Vector3(transform.position.x, transform.position.y - 1f, transform.position.z);
-
         float grapplePointRelativeYPos = _grapplePoint.y - lowestPoint.y;
-        float highestPointOnArc = grapplePointRelativeYPos + overShootYAxis;
+        float highestPointOnArc = grapplePointRelativeYPos + overshootYAxis;
 
-        if (grapplePointRelativeYPos < 0) highestPointOnArc = overShootYAxis;
+        if (grapplePointRelativeYPos < 0) highestPointOnArc = overshootYAxis;
         
-        // _pm.JumpToPosition(_grapplePoint, highestPointOnArc);
+        _pm.JumpToPosition(_grapplePoint, highestPointOnArc);
         
         Invoke(nameof(StopGrapple), 1f);
+        
+        //Cam effect
+        camEffect.DoFov(100f);
     }
 
     public void StopGrapple()
     {
-        // _pm.isFreeze = false;
-        
-        _isGrappling = false;
+        _grappling = false;
 
         _grapplingCdTimer = grapplingCd;
 
-        lr.enabled = false;
+
+        lr.enabled = false; 
+        
+        //Cam eff
+        camEffect.DoFov(85f);
     }
 
     public bool IsGrappling()
     {
-        return _isGrappling;
+        return _grappling;
     }
 
-    public Vector3 GetGrapplingPoint()
+    public Vector3 GetGrapplePoint()
     {
         return _grapplePoint;
     }
-    
     
 }
